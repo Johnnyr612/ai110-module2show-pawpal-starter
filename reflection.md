@@ -5,12 +5,37 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
++------------------+        1       * +------------------+
+|      Owner       |------------------|       Pet        |
+|------------------|                  |------------------|
+| - name           |                  | - name           |
+| - preferences    |                  | - species        |
+|------------------|                  |------------------|
+| + get_info()     |                  | + get_info()     |
++------------------+                  +------------------+
+        ^                                      |
+        |                                      |
+        |                                      |
+        | 1                                    * |
+        |                                      |
++------------------+                  +------------------+
+|    Scheduler     |<-----------------|      Task        |
+|------------------|                  |------------------|
+| + generate_plan()|                  | - title          |
+| + explain_plan() |                  | - duration       |
+|                  |                  | - priority       |
+|------------------|                  |------------------|
+|                  |                  | + get_info()     |
++------------------+                  +------------------+
 - What classes did you include, and what responsibilities did you assign to each?
+Classes include Owner, Pet, Task, and Scheduler. Pet and Tasks are related, Scheduler depends on Task, and Owner uses Scheduler. Owner can have many Pet and Pets can have more than one Task. Each class has self explanitory methods that correlate to class.
 
 **b. Design changes**
 
 - Did your design change during implementation?
+Yes
 - If yes, describe at least one change and why you made it.
+I simplified the relationshsips between the classes and made everything output in the Scheduler class(Final plan).
 
 ---
 
