@@ -44,12 +44,16 @@ I simplified the relationshsips between the classes and made everything output i
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
+The scheduler considers task time first, since the main goal is to build a daily care plan that is easy to follow. It also accounts for whether a task is recurring, whether it is already completed, and which pet the task belongs to.
 - How did you decide which constraints mattered most?
+I decided that time was the most important constraint because the app is organizing when care tasks should happen. Recurring tasks and conflict detection were also important because they affect whether the schedule is realistic. 
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+One tradeoff my scheduler makes is that it prioritizes time-based organization over more complex decision-making. For example, it will sort tasks by scheduled time and warn about conflicts, but it does not fully optimize the plan for things like urgency or duration.
 - Why is that tradeoff reasonable for this scenario?
+It's reasonable for this scenario because the main goal of the app is to create a simple, understandable daily care schedule for a pet owner. 
 
 ---
 

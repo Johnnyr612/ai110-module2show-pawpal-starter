@@ -68,19 +68,21 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+(.venv) PS D:\CodePath Forks\Week5-Project2\ai110-module2show-pawpal-starter> python -m pytest -q tests/test_pawpal.py
+.....                                                                                     [100%]
+5 passed in 0.01s
 ```
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+The scheduler now supports several core behaviors for organizing pet-care tasks:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time()` and `Scheduler.organize_tasks()` | Tasks are sorted chronologically by scheduled time, with completed tasks moved later in the list. |
+| Filtering | `Scheduler.filter_tasks()` | Tasks can be filtered by pet name and whether completed tasks should be included. |
+| Conflict handling | `Scheduler.detect_conflicts()` and `Scheduler.get_conflict_warning()` | The scheduler identifies overlapping task times and returns a lightweight warning message. |
+| Recurring tasks | `Scheduler.handle_recurring_tasks()` and `Scheduler.complete_task()` | Daily and weekly tasks can be marked as recurring, and completing one creates the next occurrence automatically. |
 
 ## 📸 Demo Walkthrough
 
