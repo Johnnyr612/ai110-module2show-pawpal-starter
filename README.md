@@ -81,12 +81,12 @@ tests\test_pawpal.py ......                                               [100%]
 ```
 The tests cover the core scheduler behaviors for PawPal+:
 
-Task completion state changes
-Adding tasks to a pet
-Sorting tasks by scheduled time
-Filtering tasks by pet and completion status
-Creating the next occurrence of a daily recurring task
-Detecting scheduling conflicts when two tasks share the same time
+- Task completion state changes
+- Adding tasks to a pet
+- Sorting tasks by scheduled time
+- Filtering tasks by pet and completion status
+- Creating the next occurrence of a daily recurring task
+- Detecting scheduling conflicts when two tasks share the same time
 
 Confidence Level: (4/5)
 
@@ -98,19 +98,45 @@ The scheduler now supports several core behaviors for organizing pet-care tasks:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `Scheduler.sort_by_time()` and `Scheduler.organize_tasks()` | Tasks are sorted chronologically by scheduled time, with completed tasks moved later in the list. |
+| Priority-based ordering | `Scheduler.organize_tasks()` | Tasks are sorted by completion status, priority level, and scheduled time. |
+| Next available slot | `Scheduler.find_next_available_slot()` | The scheduler suggests the first open time slot after a preferred time. |
 | Filtering | `Scheduler.filter_tasks()` | Tasks can be filtered by pet name and whether completed tasks should be included. |
 | Conflict handling | `Scheduler.detect_conflicts()` and `Scheduler.get_conflict_warning()` | The scheduler identifies overlapping task times and returns a lightweight warning message. |
 | Recurring tasks | `Scheduler.handle_recurring_tasks()` and `Scheduler.complete_task()` | Daily and weekly tasks can be marked as recurring, and completing one creates the next occurrence automatically. |
+
+## 💾 Data Persistence
+
+PawPal+ now saves owner, pet, and task data between runs using a JSON file.
+
+### Persistence workflow
+
+1. When the app or backend saves data, it writes the current state to `data.json`.
+2. On the next run, the app can reload that file through `Owner.load_from_json()`.
+3. This keeps pets and tasks available across sessions without manually re-entering them.
+
+### Files updated for persistence
+
+- [pawpal_system.py](pawpal_system.py) — added `Owner.save_to_json()` and `Owner.load_from_json()` plus JSON-safe task serialization
+- [tests/test_pawpal.py](tests/test_pawpal.py) — added tests covering persistence and scheduler enhancements
+
+### Example CLI output
+
+```text
+Today's Schedule
+==================
+08:00 | Mochi | Medication (High)
+09:00 | Mochi | Feeding (Medium)
+18:00 | Mochi | Grooming (Low)
+```
 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Enter owner name(Johnny) and `Save Owner`.
+2. Enter Dexter name for dog pet and press `add pet`.
+3. Add task by selecting pet name.
+4. Include task title and task frequency then press `Add Task`.
+5. Then press `Generate Schedule` to check for scheduling conflicts, sort by name, and display schedule for tasks.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

@@ -10,15 +10,19 @@
 
 **What task did you give the agent?**
 
-<!-- Describe the goal you asked the agent to accomplish -->
+I asked the agent to extend the scheduler with priority-based ordering, a next-available-slot capability, and JSON persistence, while keeping the existing tests compatible.
 
 **What did the agent do?**
 
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
+- Updated [pawpal_system.py](pawpal_system.py) to add a `priority` field to `Task`
+- Added `Scheduler.find_next_available_slot()` for advanced scheduling support
+- Added `Owner.save_to_json()` and `Owner.load_from_json()` for persistence
+- Added regression tests in [tests/test_pawpal.py](tests/test_pawpal.py)
+- Helped verify behavior by running pytest after the changes
 
 **What did you have to verify or fix manually?**
 
-<!-- Describe anything the agent got wrong or that required human review -->
+I reviewed the generated code to make sure the JSON serialization handled dataclasses correctly and that the new sorting logic matched the intended priority order.
 
 ---
 

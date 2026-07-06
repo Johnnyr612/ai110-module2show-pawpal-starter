@@ -62,12 +62,16 @@ It's reasonable for this scenario because the main goal of the app is to create 
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+AI was useful in getting a fast understanding of the logic and functionality of the project. If i had further questions about the files, i would attach the file as context and ask specific questions.
 - What kinds of prompts or questions were most helpful?
+Prompts like, 'give me a thorough explination of the methods inside pawpal_system.py and the logic behind them'. Prompts like this would help me understand the bigger picture faster.
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+I had to ask follow-up question when trying to map out the initial UML becuase I noticed it was not being accurate and vague at times.
 - How did you evaluate or verify what the AI suggested?
+I would read the explinations the chatbot gave and then verify with my own eyes if it is true or not. The pytest was also a helpful measure when verifying new outputs.
 
 ---
 
@@ -76,13 +80,16 @@ It's reasonable for this scenario because the main goal of the app is to create 
 **a. What you tested**
 
 - What behaviors did you test?
+I tested task completion and status, adding tasks to pets, sorting tasks by pet and completion status, and detect schduling conflicts.
 - Why were these tests important?
+These tasks were important because they verified the main functions of the app.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+The scheduler works correctly for sure, i tested it.
 - What edge cases would you test next if you had more time?
-
+I would include a test case for handling an empty scheduler or invalid/missing time values.
 ---
 
 ## 5. Reflection
@@ -90,11 +97,15 @@ It's reasonable for this scenario because the main goal of the app is to create 
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+I'm satified with completing the `pawpal_system.py` file with correct logic that makes the app run nice.
 
 **b. What you would improve**
+I would include a mechanism that flags a scheduling conflict before the user generates the schedule so the user knows if there will be a scheduling conflic before the the generation.
 
 - If you had another iteration, what would you improve or redesign?
+I would definitely improve the UI icons and their placements. Other than that, i liked the app icon(paws).
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+It's nice to have a visual like a UML to see what talks to what. It's a nice upgrade from just having to read comments.

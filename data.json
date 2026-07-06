@@ -1,0 +1,44 @@
+{
+  "name": "Johnny",
+  "preferences": "",
+  "pets": [
+    {
+      "name": "Mochi",
+      "species": "dog",
+      "age": 0,
+      "tasks": [
+        {
+          "description": "Morning walk",
+          "scheduled_time": "08:00 AM",
+          "frequency": "daily",
+          "completed": false,
+          "due_date": null,
+          "priority": "low"
+        }
+      ]
+    },
+    {
+      "name": "Mochiee",
+      "species": "cat",
+      "age": 0,
+      "tasks": [
+        {
+          "description": "Morning walk",
+          "scheduled_time": "08:00 AM",
+          "frequency": "daily",
+          "completed": false,
+          "due_date": null,
+          "priority": "medium"
+        },
+        {
+          "description": "Evening walk (both pets)",
+          "scheduled_time": "05:00 AM",
+          "frequency": "daily",
+          "completed": false,
+          "due_date": null,
+          "priority": "medium"
+        }
+      ]
+    }
+  ]
+}

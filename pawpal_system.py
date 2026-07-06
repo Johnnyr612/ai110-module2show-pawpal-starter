@@ -1,17 +1,113 @@
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from typing import List
 
 
 def _to_minutes(time_value: str) -> int:
-    """Convert a HH:MM time string to minutes from midnight."""
-    try:
-        hours, minutes = map(int, time_value.split(":"))
-        return hours * 60 + minutes
-    except ValueError:
+    """Convert a time string like 8:30 AM or 18:30 to minutes from midnight."""
+    normalized = normalize_time(time_value)
+    if not normalized:
         return 24 * 60
+
+    try:
+        value = normalized.split(" ")[0]
+        hours_str, minutes_str = value.split(":")
+        hours = int(hours_str)
+        minutes = int(minutes_str)
+        meridiem = normalized.split(" ")[1].upper() if len(normalized.split(" ")) > 1 else "AM"
+    except (ValueError, IndexError):
+        return 24 * 60
+
+    if meridiem == "PM" and hours != 12:
+        hours += 12
+    elif meridiem == "AM" and hours == 12:
+        hours = 0
+
+    if not 0 <= hours <= 23 or not 0 <= minutes <= 59:
+        return 24 * 60
+    return hours * 60 + minutes
+
+
+def normalize_time(time_value: str) -> str:
+    """Normalize a time string to 12-hour format like 08:30 AM when possible."""
+    value = (time_value or "").strip()
+    if not value:
+        return ""
+
+    normalized_value = value.upper().strip()
+    meridiem = ""
+    if normalized_value.endswith("AM"):
+        meridiem = "AM"
+        normalized_value = normalized_value[:-2].strip()
+    elif normalized_value.endswith("PM"):
+        meridiem = "PM"
+        normalized_value = normalized_value[:-2].strip()
+    elif "AM" in normalized_value or "PM" in normalized_value:
+        return ""
+
+    if not normalized_value:
+        return ""
+
+    parts = normalized_value.split(":")
+    if len(parts) not in {1, 2} or not parts[0].isdigit():
+        return ""
+
+    hours = int(parts[0])
+    minutes = 0
+    if len(parts) == 2:
+        if not parts[1].isdigit():
+            return ""
+        minutes = int(parts[1])
+
+    if not 0 <= minutes <= 59:
+        return ""
+
+    if meridiem:
+        if not 1 <= hours <= 12:
+            return ""
+        return f"{hours:02d}:{minutes:02d} {meridiem}"
+
+    if 0 <= hours <= 23:
+        if hours == 0:
+            hours = 12
+            meridiem = "AM"
+        elif hours < 12:
+            meridiem = "AM"
+        elif hours == 12:
+            meridiem = "PM"
+        else:
+            hours -= 12
+            meridiem = "PM"
+        return f"{hours:02d}:{minutes:02d} {meridiem}"
+
+    return ""
+
+
+def _priority_rank(priority: str) -> int:
+    """Map a priority label to a sortable number."""
+    normalized = priority.lower()
+    if normalized == "high":
+        return 0
+    if normalized == "medium":
+        return 1
+    return 2
+
+
+def _format_minutes(minutes: int) -> str:
+    """Format minutes from midnight as 12-hour HH:MM AM/PM."""
+    hours = minutes // 60
+    mins = minutes % 60
+    meridiem = "AM"
+    if hours >= 12:
+        meridiem = "PM"
+    display_hours = hours % 12
+    if display_hours == 0:
+        display_hours = 12
+    return f"{display_hours:02d}:{mins:02d} {meridiem}"
 
 
 @dataclass
@@ -21,6 +117,15 @@ class Task:
     frequency: str = "once"
     completed: bool = False
     due_date: date | None = None
+    priority: str = "medium"
+
+    def __post_init__(self) -> None:
+        """Normalize time and priority values when a task is created."""
+        self.scheduled_time = normalize_time(self.scheduled_time)
+        normalized_priority = (self.priority or "medium").lower().strip()
+        if normalized_priority not in {"low", "medium", "high"}:
+            normalized_priority = "medium"
+        self.priority = normalized_priority
 
     def update_description(self, description: str) -> None:
         """Update the task description."""
@@ -28,11 +133,19 @@ class Task:
 
     def update_time(self, scheduled_time: str) -> None:
         """Set the task's scheduled time."""
-        self.scheduled_time = scheduled_time
+        normalized = normalize_time(scheduled_time)
+        self.scheduled_time = normalized if normalized else ""
 
     def update_frequency(self, frequency: str) -> None:
         """Set how often the task repeats."""
         self.frequency = frequency
+
+    def update_priority(self, priority: str) -> None:
+        """Set the task priority level."""
+        normalized = priority.lower()
+        if normalized not in {"low", "medium", "high"}:
+            normalized = "medium"
+        self.priority = normalized
 
     def mark_complete(self) -> None:
         """Mark the task as completed."""
@@ -45,6 +158,31 @@ class Task:
     def mark_pending(self) -> None:
         """Mark the task as not completed."""
         self.completed = False
+
+    def to_dict(self) -> dict:
+        """Convert the task to a JSON-friendly dictionary."""
+        return {
+            "description": self.description,
+            "scheduled_time": self.scheduled_time,
+            "frequency": self.frequency,
+            "completed": self.completed,
+            "due_date": self.due_date.isoformat() if self.due_date else None,
+            "priority": self.priority,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Task":
+        """Create a task from a JSON-friendly dictionary."""
+        due_date = data.get("due_date")
+        task = cls(
+            description=data.get("description", ""),
+            scheduled_time=data.get("scheduled_time", ""),
+            frequency=data.get("frequency", "once"),
+            completed=data.get("completed", False),
+            due_date=date.fromisoformat(due_date) if due_date else None,
+            priority=data.get("priority", "medium"),
+        )
+        return task
 
 
 @dataclass
@@ -109,6 +247,45 @@ class Owner:
         """Return all incomplete tasks across the owner's pets."""
         return [task for task in self.get_all_tasks() if not task.completed]
 
+    def save_to_json(self, file_path: str) -> None:
+        """Persist the owner, pets, and tasks to a JSON file."""
+        payload = {
+            "name": self.name,
+            "preferences": self.preferences,
+            "pets": [
+                {
+                    "name": pet.name,
+                    "species": pet.species,
+                    "age": pet.age,
+                    "tasks": [task.to_dict() for task in pet.get_tasks()],
+                }
+                for pet in self.pets
+            ],
+        }
+        with open(file_path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+
+    @classmethod
+    def load_from_json(cls, file_path: str) -> "Owner":
+        """Load an owner, pets, and tasks from a JSON file."""
+        if not os.path.exists(file_path):
+            return cls()
+
+        with open(file_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+
+        owner = cls(name=payload.get("name", ""), preferences=payload.get("preferences", ""))
+        for pet_data in payload.get("pets", []):
+            pet = Pet(
+                name=pet_data.get("name", ""),
+                species=pet_data.get("species", ""),
+                age=pet_data.get("age", 0),
+            )
+            for task_data in pet_data.get("tasks", []):
+                pet.add_task(Task.from_dict(task_data))
+            owner.add_pet(pet)
+        return owner
+
 
 class Scheduler:
     def __init__(self, owner: Owner | None = None) -> None:
@@ -126,15 +303,35 @@ class Scheduler:
         return [task for task in self.get_all_tasks() if not task.completed]
 
     def organize_tasks(self) -> List[Task]:
-        """Return all tasks ordered by completion state, time, and description."""
+        """Return all tasks ordered by completion state, priority, time, and description."""
         return sorted(
             self.get_all_tasks(),
-            key=lambda task: (task.completed, _to_minutes(task.scheduled_time), task.description.lower()),
+            key=lambda task: (
+                task.completed,
+                _priority_rank(task.priority),
+                _to_minutes(task.scheduled_time),
+                task.description.lower(),
+            ),
         )
 
     def sort_by_time(self) -> List[Task]:
         """Return tasks sorted chronologically by their scheduled HH:MM time."""
         return sorted(self.get_all_tasks(), key=lambda task: _to_minutes(task.scheduled_time))
+
+    def find_next_available_slot(self, preferred_time: str) -> str:
+        """Return the first free time slot at or after the preferred time."""
+        occupied_slots = {
+            _to_minutes(task.scheduled_time)
+            for task in self.get_all_tasks()
+            if task.scheduled_time
+        }
+        if not preferred_time:
+            preferred_time = "08:00"
+
+        current_minutes = _to_minutes(preferred_time)
+        while current_minutes in occupied_slots:
+            current_minutes += 60
+        return _format_minutes(current_minutes)
 
     def filter_tasks(self, pet_name: str | None = None, include_completed: bool = True) -> List[Task]:
         """Return tasks filtered by pet name and whether completed items should be included."""
@@ -206,6 +403,7 @@ class Scheduler:
             frequency=task.frequency,
             completed=False,
             due_date=next_due_date,
+            priority=task.priority,
         )
 
         for pet in self.owner.get_pets():
