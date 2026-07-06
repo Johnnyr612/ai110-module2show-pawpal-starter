@@ -79,3 +79,23 @@ def test_recurring_task_creates_next_occurrence_when_completed():
     assert next_task.frequency == "daily"
     assert next_task.due_date == date.today() + timedelta(days=1)
     assert len(pet.get_tasks()) == 2
+
+
+def test_conflict_detection_flags_duplicate_times():
+    owner = Owner(name="Jordan")
+    pet = Pet(name="Mochi", species="dog")
+    owner.add_pet(pet)
+
+    first_task = Task(description="Morning walk", scheduled_time="08:00")
+    second_task = Task(description="Feeding", scheduled_time="08:00")
+    pet.add_task(first_task)
+    pet.add_task(second_task)
+
+    scheduler = Scheduler(owner)
+
+    assert scheduler.has_conflicts() is True
+    conflicts = scheduler.detect_conflicts()
+    assert len(conflicts) == 1
+    assert conflicts[0][0] is first_task
+    assert conflicts[0][1] is second_task
+    assert "share the same time" in scheduler.get_conflict_warning()

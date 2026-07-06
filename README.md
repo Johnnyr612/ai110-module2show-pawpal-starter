@@ -68,10 +68,29 @@ pytest --cov
 Sample test output:
 
 ```
-(.venv) PS D:\CodePath Forks\Week5-Project2\ai110-module2show-pawpal-starter> python -m pytest -q tests/test_pawpal.py
-.....                                                                                     [100%]
-5 passed in 0.01s
+(.venv) PS D:\CodePath Forks\Week5-Project2\ai110-module2show-pawpal-starter> python -m pytest
+================ test session starts ====================
+platform win32 -- Python 3.13.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\CodePath Forks\Week5-Project2\ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 6 items                                                               
+
+tests\test_pawpal.py ......                                               [100%]
+
+================ 6 passed in 0.02s ======================
 ```
+The tests cover the core scheduler behaviors for PawPal+:
+
+Task completion state changes
+Adding tasks to a pet
+Sorting tasks by scheduled time
+Filtering tasks by pet and completion status
+Creating the next occurrence of a daily recurring task
+Detecting scheduling conflicts when two tasks share the same time
+
+Confidence Level: (4/5)
+
+The scheduler behavior is well covered by the current test suite, and the recent pytest run showed 6 passing tests. The implementation is good but there is still room for more test cases.
 
 ## 📐 Smarter Scheduling
 
